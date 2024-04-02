@@ -8,8 +8,13 @@ import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 
 
+whitelist = 772088276828
 OUTPUT_PATH = Path(__file__).parent
 PHOTO_PATH = OUTPUT_PATH / "Photos"
+
+led_green = 3
+led_red = 8
+
 
 IDTOLOGING = 32
 Scanning = False
@@ -39,6 +44,28 @@ register_button = tk.Button(root, text="Register")
 
 scanning_label = tk.Label(root, text="Waiting for badge...")
 scanning_label.pack()
+
+
+#Définit la fonction permettant d'allumer une led
+def turn_led_on (led) :
+    GPIO.setup(led, GPIO.OUT) #Active le contrôle du GPIO
+    GPIO.output(led, GPIO.HIGH) #Allume la led
+
+#Définit la fonction permettant d'éteindre une led
+def turn_led_off (led) :
+    GPIO.setup(led, GPIO.OUT) #Active le contrôle du GPIO
+    GPIO.output(led, GPIO.LOW) #Eteind la led
+
+
+def turn_red_on () :
+    turn_led_off(led_green) #Eteind la led verte
+    turn_led_on(led_red) #Allume la led rouge
+
+#Définit la fonction permettant d'allumer la verte et éteindre la rouge
+def turn_green_on () :
+    turn_led_off(led_red) #Eteind la led rouge
+    turn_led_on(led_green) #Allume la led verte
+
 
 def Login(id):
     global Scanning
@@ -103,8 +130,13 @@ def scanning_loop():
                 print(id)
                 print(text)
                 Login(IDTOLOGING)
+
+                if IDTOLOGING == whitelist:
+                    turn_green_on()
+                else:
+                    turn_red_on()
             finally:
-                GPIO.cleanup()
+                pass
             time.sleep(1)
 
 scanning_thread = threading.Thread(target=scanning_loop, daemon=True)
