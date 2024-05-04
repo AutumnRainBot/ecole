@@ -6,7 +6,17 @@ import tkinter as tk
 import threading
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
+from machine import I2C, Pin
+from lcd_api import LcdApi
+from pico_i2c_lcd import I2cLcd
 
+
+I2C_ADDR     = 63
+I2C_NUM_ROWS = 2
+I2C_NUM_COLS = 16
+
+i2c = I2C(0, sda=machine.Pin(0), scl=machine.Pin(1), freq=400000)
+lcd = I2cLcd(i2c, I2C_ADDR, I2C_NUM_ROWS, I2C_NUM_COLS)
 
 whitelist = 772088276828
 OUTPUT_PATH = Path(__file__).parent
@@ -133,8 +143,12 @@ def scanning_loop():
 
                 if IDTOLOGING == whitelist:
                     turn_green_on()
+                    lcd.move_to(0,0)
+                    lcd.putstr("Bienvenue")
                 else:
                     turn_red_on()
+                    lcd.move_to(0,0)
+                    lcd.putstr("Access refusé")
             finally:
                 pass
             time.sleep(1)
